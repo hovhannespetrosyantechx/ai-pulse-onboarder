@@ -1,0 +1,42 @@
+{
+  "name": "ai-pulse-onboarder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hovhannespetrosyantechx/ai-pulse-onboarder.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hovhannespetrosyantechx/ai-pulse-onboarder/issues"
+  },
+  "homepage": "https://github.com/hovhannespetrosyantechx/ai-pulse-onboarder#readme",
+  "dependencies": {
+    "@prisma/client": "^7.8.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "groq-sdk": "^1.2.1",
+    "langchain": "^1.4.4",
+    "multer": "^2.1.1",
+    "pdf-parse": "^2.4.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.1.0",
+    "@types/pdf-parse": "^1.1.5",
+    "nodemon": "^3.1.14",
+    "prisma": "^6.19.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}
