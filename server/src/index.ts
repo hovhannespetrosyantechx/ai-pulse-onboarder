@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from "express"
 import cors from "cors"
 import dotenv from "dotenv"
 import documentsRouter from "./routes/document"
+import chatRouter from "./routes/chat"
 
 
 dotenv.config({ path: "../../.env" })
@@ -26,6 +27,7 @@ app.get("/health", (_req, res) => {
 })
  
 app.use("/api/documents", documentsRouter)
+app.use("/api/chat", chatRouter)
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error("[Error]", err.message)
