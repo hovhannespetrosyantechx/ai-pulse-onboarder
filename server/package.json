@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/hovhannespetrosyantechx/ai-pulse-onboarder#readme",
   "dependencies": {
+    "@langchain/textsplitters": "^1.0.1",
     "@prisma/client": "^5.22.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
