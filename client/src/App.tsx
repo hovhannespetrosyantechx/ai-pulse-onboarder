@@ -1,16 +1,69 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import useSWR from "swr"
+import Sidebar from "./components/Sidebar"
+import UploadZone from "./components/UploadZone"
+import DocumentList from "./components/DocumentList"
+import ChatInterface from "./components/ChatInterface"
+import type{ Document, View } from "./types"
+import "./App.css"
 
-function App() {
-  const [message, setMessage] = useState("")
+const fetcher = (url: string) =>
+  fetch(url).then(res => {
+    if (!res.ok) throw new Error(`Server error: ${res.status}`)
+    return res.json()
+  })
 
-  useEffect(() => {
-    fetch("http://localhost:3001")
-      .then((res) => res.json())
-      .then((data) => setMessage(data.message))
-      .catch((err) => console.error("CORS or connection error:", err))
-  }, [])
+export default function App() {
+  const [view, setView] = useState<View>({ type: "dashboard" })
 
-  return <h1>{message || "Connecting to API..."}</h1>
+  const { data: documents = [], mutate } = useSWR<Document[]>(
+    "http://localhost:3001/api/documents",
+    fetcher,
+    {
+      // function form: SWR passes the latest data in so we can decide the interval
+      refreshInterval: (latest) =>
+        latest?.some((d) => d.status === "processing") ? 2000 : 0,
+    }
+  )
+
+  const handleDelete = async (id: string) => {
+    await fetch(`http://localhost:3001/api/documents/${id}`, { method: "DELETE" })
+    mutate()  // refetch after delete
+  }
+
+  const activeDocument =
+    view.type === "document-chat"
+      ? documents.find((d) => d.id === view.documentId)
+      : undefined
+
+  return (
+    <div className="app-layout">
+      <Sidebar
+        documents={documents}
+        activeView={view}
+        onNavigate={setView}
+      />
+
+      <main className="main-content">
+        {view.type === "dashboard" && (
+          <>
+            <UploadZone onUploadComplete={mutate} />
+            <DocumentList
+              documents={documents}
+              onChat={(id) => setView({ type: "document-chat", documentId: id })}
+              onDelete={handleDelete}
+            />
+          </>
+        )}
+
+        {(view.type === "document-chat" || view.type === "general-chat") && (
+          <ChatInterface
+            mode={view.type === "general-chat" ? "general" : "document"}
+            document={activeDocument}
+            onBack={() => setView({ type: "dashboard" })}
+          />
+        )}
+      </main>
+    </div>
+  )
 }
-
-export default App

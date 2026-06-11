@@ -1,0 +1,76 @@
+.upload-zone {
+  border: 2px dashed #d0cfc8;
+  border-radius: 12px;
+  padding: 40px 24px;
+  text-align: center;
+  background: #fff;
+  transition: border-color 0.15s, background 0.15s;
+  cursor: default;
+}
+
+.upload-zone.dragging {
+  border-color: #6c63ff;
+  background: #f3f2ff;
+}
+
+.upload-zone.uploading {
+  border-color: #d0cfc8;
+  background: #fafaf8;
+}
+
+.upload-zone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none; /* prevents child elements from stealing drag events */
+}
+
+/* re-enable pointer events only on the browse button */
+.upload-browse-btn {
+  pointer-events: all;
+  background: none;
+  border: none;
+  color: #6c63ff;
+  font-size: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.upload-icon {
+  color: #aaa;
+}
+
+.upload-zone.dragging .upload-icon {
+  color: #6c63ff;
+}
+
+.upload-label {
+  font-size: 15px;
+  color: #555;
+}
+
+.upload-hint {
+  font-size: 13px;
+  color: #aaa;
+}
+
+.upload-error {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #c0392b;
+}
+
+.upload-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #6c63ff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
