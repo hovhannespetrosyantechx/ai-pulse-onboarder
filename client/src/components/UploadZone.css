@@ -1,21 +1,21 @@
 .upload-zone {
-  border: 2px dashed #d0cfc8;
-  border-radius: 12px;
+  border: 2px dashed var(--color-border);
+  border-radius: 8px;
   padding: 40px 24px;
   text-align: center;
-  background: #fff;
+  background: var(--color-surface);
   transition: border-color 0.15s, background 0.15s;
   cursor: default;
 }
 
 .upload-zone.dragging {
-  border-color: #6c63ff;
-  background: #f3f2ff;
+  border-color: var(--color-accent);
+  background: var(--color-accent-subtle);
 }
 
 .upload-zone.uploading {
-  border-color: #d0cfc8;
-  background: #fafaf8;
+  border-color: var(--color-border);
+  background: var(--color-surface-raised);
 }
 
 .upload-zone-content {
@@ -31,7 +31,7 @@
   pointer-events: all;
   background: none;
   border: none;
-  color: #6c63ff;
+  color: var(--color-accent);
   font-size: inherit;
   cursor: pointer;
   text-decoration: underline;
@@ -39,34 +39,34 @@
 }
 
 .upload-icon {
-  color: #aaa;
+  color: var(--color-text-secondary);
 }
 
 .upload-zone.dragging .upload-icon {
-  color: #6c63ff;
+  color: var(--color-accent);
 }
 
 .upload-label {
   font-size: 15px;
-  color: #555;
+  color: var(--color-text);
 }
 
 .upload-hint {
   font-size: 13px;
-  color: #aaa;
+  color: var(--color-text-secondary);
 }
 
 .upload-error {
   margin-top: 12px;
   font-size: 13px;
-  color: #c0392b;
+  color: var(--color-danger);
 }
 
 .upload-spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid #e0e0e0;
-  border-top-color: #6c63ff;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }

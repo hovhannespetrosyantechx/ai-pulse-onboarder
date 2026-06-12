@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import type { Document, ChatMessage } from "../types";
 import ReactMarkdown from "react-markdown";
-import { FileText, FileJson, File, ArrowLeft, Send } from "lucide-react";
+import { FileText, FileJson, File, ArrowLeft, Send, AlertTriangle } from "lucide-react";
 import "./ChatInterface.css";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -18,7 +18,7 @@ const SUGGESTED_PROMPTS = [
   "What documents are available?",
   "Summarize all documents briefly",
   "What are the key policies across all documents?",
-  "Are there any conflicting information between documents?",
+  "Is there any conflicting information between documents?",
 ];
 
 const API_BASE = "http://localhost:3001";
@@ -26,7 +26,7 @@ const API_BASE = "http://localhost:3001";
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function FileIcon({ type }: { type: string }) {
-  if (type.includes("json")) return <FileJson size={15} />;
+  if (type === "text/markdown") return <FileJson size={15} />;
   if (type.includes("pdf")) return <FileText size={15} />;
   return <File size={15} />;
 }
@@ -282,7 +282,8 @@ export default function ChatInterface({
       <footer className="ci-footer">
         {error && (
           <p className="ci-error" role="alert">
-            ⚠ {error}
+            <AlertTriangle size={13} />
+            {error}
           </p>
         )}
         <div className="ci-input-row">

@@ -1,4 +1,4 @@
-import { FileText, LayoutDashboard, MessagesSquare, Zap } from "lucide-react"
+import { File, FileJson, FileText, LayoutDashboard, MessagesSquare, Zap } from "lucide-react"
 import type{ Document, View } from "../types"
 import "./Sidebar.css"
 
@@ -11,6 +11,19 @@ interface SidebarProps {
 export default function Sidebar({ documents, activeView, onNavigate }: SidebarProps) {
   const isDashboard = activeView.type === "dashboard"
   const isGeneral   = activeView.type === "general-chat"
+  const hasReadyDocuments = documents.some((doc) => doc.status === "ready")
+
+  function getFileIcon(type: string) {
+    if (type === "text/markdown") return <FileJson size={14} />
+    if (type === "application/pdf" || type === "text/plain") return <FileText size={14} />
+    return <File size={14} />
+  }
+
+  function getDocumentTitle(doc: Document) {
+    if (doc.status === "processing") return "Still processing..."
+    if (doc.status === "error") return doc.error ?? "Document failed to process"
+    return doc.originalName
+  }
 
   return (
     <aside className="sidebar">
@@ -33,7 +46,7 @@ export default function Sidebar({ documents, activeView, onNavigate }: SidebarPr
         <button
           className={`sidebar-nav-item ${isGeneral ? "active" : ""}`}
           onClick={() => onNavigate({ type: "general-chat" })}
-          disabled={documents.length === 0}
+          disabled={!hasReadyDocuments}
         >
           <MessagesSquare size={16} />
           All Documents Chat
@@ -55,9 +68,9 @@ export default function Sidebar({ documents, activeView, onNavigate }: SidebarPr
                 className={`sidebar-doc-item ${isActive ? "active" : ""}`}
                 onClick={() => onNavigate({ type: "document-chat", documentId: doc.id })}
                 disabled={doc.status !== "ready"}
-                title={doc.status === "processing" ? "Still processing…" : doc.originalName}
+                title={getDocumentTitle(doc)}
               >
-                <FileText size={14} />
+                {getFileIcon(doc.type)}
                 <span className="sidebar-doc-name">{doc.originalName}</span>
                 {doc.status === "processing" && (
                   <span className="sidebar-doc-badge">…</span>

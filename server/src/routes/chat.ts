@@ -9,34 +9,140 @@ const MODEL = "openai/gpt-oss-120b";
 
 // ~4 chars per token; reserve 4k tokens for conversation + response
 const MAX_CONTEXT_CHARS = 16_000;
+const MAX_CONTEXT_CHUNKS = 12;
 
 const SYSTEM_BASE = `You are an AI Onboarding Assistant. \
 Use the provided context below to answer questions. \
 If the answer isn't in the context, state that you don't know. \
 Always cite the document name when referencing information.`;
 
-function buildDocContext(name: string, chunks: string[]): string {
-  let ctx = "";
-  for (const chunk of chunks) {
-    if (ctx.length + chunk.length > MAX_CONTEXT_CHARS) break;
-    ctx += chunk + "\n\n";
+const STOP_WORDS = new Set([
+  "a",
+  "an",
+  "and",
+  "are",
+  "as",
+  "at",
+  "be",
+  "for",
+  "from",
+  "how",
+  "i",
+  "in",
+  "is",
+  "it",
+  "of",
+  "on",
+  "or",
+  "that",
+  "the",
+  "this",
+  "to",
+  "what",
+  "when",
+  "where",
+  "which",
+  "who",
+  "why",
+  "with",
+  "you",
+  "your",
+]);
+
+function getLatestUserQuestion(
+  messages: Array<{ role: "user" | "assistant"; content: string }>,
+): string {
+  return [...messages].reverse().find((message) => message.role === "user")?.content ?? "";
+}
+
+function tokenize(text: string): string[] {
+  return text
+    .toLowerCase()
+    .match(/[a-z0-9]+/g)
+    ?.filter((term) => term.length > 2 && !STOP_WORDS.has(term)) ?? [];
+}
+
+function scoreChunk(chunk: string, queryTerms: string[]): number {
+  if (queryTerms.length === 0) return 0;
+
+  const lowerChunk = chunk.toLowerCase();
+  const chunkTerms = tokenize(chunk);
+  const chunkTermCounts = new Map<string, number>();
+  for (const term of chunkTerms) {
+    chunkTermCounts.set(term, (chunkTermCounts.get(term) ?? 0) + 1);
   }
+
+  let score = 0;
+  for (const term of new Set(queryTerms)) {
+    score += (chunkTermCounts.get(term) ?? 0) * 3;
+    if (lowerChunk.includes(term)) score += 1;
+  }
+
+  const queryPhrase = queryTerms.join(" ");
+  if (queryPhrase.length > 8 && lowerChunk.includes(queryPhrase)) {
+    score += 10;
+  }
+
+  return score;
+}
+
+function selectRelevantChunks(chunks: string[], question: string): string[] {
+  const queryTerms = tokenize(question);
+
+  return chunks
+    .map((chunk, index) => ({
+      chunk,
+      index,
+      score: scoreChunk(chunk, queryTerms),
+    }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .slice(0, MAX_CONTEXT_CHUNKS)
+    .sort((a, b) => a.index - b.index)
+    .map(({ chunk }) => chunk);
+}
+
+function buildDocContext(name: string, chunks: string[], question: string): string {
+  let ctx = "";
+  const relevantChunks = selectRelevantChunks(chunks, question);
+
+  for (const [index, chunk] of relevantChunks.entries()) {
+    const section = `[Chunk ${index + 1}]\n${chunk}\n\n`;
+    if (ctx.length + section.length > MAX_CONTEXT_CHARS) break;
+    ctx += section;
+  }
+
   return `Document: "${name}"\n\n${ctx}`;
 }
 
 function buildGeneralContext(
   docs: Array<{ name: string; chunks: string[] }>,
+  question: string,
 ): string {
-  const perDoc = Math.floor(MAX_CONTEXT_CHARS / Math.max(docs.length, 1));
+  const queryTerms = tokenize(question);
+  const rankedChunks = docs
+    .flatMap((doc) =>
+      doc.chunks.map((chunk, index) => ({
+        docName: doc.name,
+        chunk,
+        index,
+        score: scoreChunk(chunk, queryTerms),
+      })),
+    )
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        a.docName.localeCompare(b.docName) ||
+        a.index - b.index,
+    )
+    .slice(0, MAX_CONTEXT_CHUNKS);
+
   let ctx = "";
-  for (const doc of docs) {
-    let docSnippet = "";
-    for (const chunk of doc.chunks) {
-      if (docSnippet.length + chunk.length > perDoc) break;
-      docSnippet += chunk + "\n\n";
-    }
-    ctx += `--- Document: "${doc.name}" ---\n${docSnippet.trim()}\n\n`;
+  for (const item of rankedChunks) {
+    const section = `--- Document: "${item.docName}", chunk ${item.index + 1} ---\n${item.chunk.trim()}\n\n`;
+    if (ctx.length + section.length > MAX_CONTEXT_CHARS) break;
+    ctx += section;
   }
+
   return ctx.trim();
 }
 
@@ -118,7 +224,8 @@ router.post("/", async (req: Request, res: Response) => {
     await saveMessage(sessionId, "user", lastUserMsg.content);
   }
 
-  const context = buildDocContext(doc.name, doc.chunks);
+  const question = getLatestUserQuestion(messages);
+  const context = buildDocContext(doc.name, doc.chunks, question);
   const systemPrompt = `${SYSTEM_BASE}\n\nContext:\n${context}`;
 
   try {
@@ -169,7 +276,8 @@ router.post("/general", async (req: Request, res: Response) => {
     await saveMessage(sessionId, "user", lastUserMsg.content);
   }
 
-  const context = buildGeneralContext(docs);
+  const question = getLatestUserQuestion(messages);
+  const context = buildGeneralContext(docs, question);
   const systemPrompt = `${SYSTEM_BASE}\n\nContext from all uploaded documents:\n${context}`;
 
   try {

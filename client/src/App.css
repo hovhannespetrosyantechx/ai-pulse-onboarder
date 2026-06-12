@@ -12,8 +12,8 @@ html, body, #root {
   display: flex;
   height: 100vh;
   overflow: hidden;
-  background: #f5f4f0;
-  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--color-bg);
+  font-family: var(--font-sans);
 }
 
 .main-content {
@@ -25,4 +25,3 @@ html, body, #root {
   gap: 24px;
   min-width: 0; /* prevents flex blowout */
 }
-

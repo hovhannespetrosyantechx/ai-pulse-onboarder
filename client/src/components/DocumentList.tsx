@@ -9,8 +9,8 @@ interface DocumentListProps {
 }
 
 function getFileIcon(type: string) {
-  if (type === "application/json") return <FileJson size={18} />
-  if (type === "application/pdf" || type.startsWith("text/")) return <FileText size={18} />
+  if (type === "text/markdown") return <FileJson size={18} />
+  if (type === "application/pdf" || type === "text/plain") return <FileText size={18} />
   return <File size={18} />
 }
 

@@ -1,10 +1,14 @@
 import { Router, Request, Response } from "express"
 import multer from "multer"
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters"
+import { PDFParse } from "pdf-parse"
 import { prisma } from "../lib/prisma"
-const pdfParse = require("pdf-parse") as (buffer: Buffer) => Promise<{ text: string }>
 
 const router = Router()
+
+const UPLOAD_LIMIT = 10
+const UPLOAD_WINDOW_MS = 60_000
+const uploadAttempts = new Map<string, number[]>()
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -21,6 +25,27 @@ const upload = multer({
   },
 })
 
+function uploadRateLimit(req: Request, res: Response, next: () => void) {
+  const key = req.ip || req.socket.remoteAddress || "unknown"
+  const now = Date.now()
+  const recentAttempts = (uploadAttempts.get(key) ?? []).filter(
+    (timestamp) => now - timestamp < UPLOAD_WINDOW_MS
+  )
+
+  if (recentAttempts.length >= UPLOAD_LIMIT) {
+    const retryAfterMs = UPLOAD_WINDOW_MS - (now - recentAttempts[0])
+    res.setHeader("Retry-After", Math.ceil(retryAfterMs / 1000))
+    res.status(429).json({
+      error: "Upload limit reached. Please wait a minute before uploading again.",
+    })
+    return
+  }
+
+  recentAttempts.push(now)
+  uploadAttempts.set(key, recentAttempts)
+  next()
+}
+
 const splitter = new RecursiveCharacterTextSplitter({
   chunkSize: 1000,
   chunkOverlap: 200,
@@ -31,14 +56,19 @@ async function extractText(
   mimetype: string
 ): Promise<string> {
   if (mimetype === "application/pdf") {
-    const result = await pdfParse(buffer)
-    return result.text
+    const parser = new PDFParse({ data: buffer })
+    try {
+      const result = await parser.getText()
+      return result.text
+    } finally {
+      await parser.destroy()
+    }
   }
 
   return buffer.toString("utf-8")
 }
 
-router.post("/", upload.single("file"), async (req: Request, res: Response) => {
+router.post("/", uploadRateLimit, upload.single("file"), async (req: Request, res: Response) => {
 
   if (!req.file) {
     res.status(400).json({ error: "No file uploaded." })

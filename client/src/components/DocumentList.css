@@ -1,13 +1,14 @@
 .doclist {
-  background: #fff;
-  border-radius: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
   padding: 24px;
 }
 
 .doclist-heading {
   font-size: 15px;
   font-weight: 600;
-  color: #222;
+  color: var(--color-text);
   margin-bottom: 16px;
 }
 
@@ -28,17 +29,17 @@
 }
 
 .doclist-item:hover {
-  background: #f8f8f6;
+  background: var(--color-bg);
 }
 
 .doclist-icon {
-  color: #aaa;
+  color: var(--color-text-secondary);
   flex-shrink: 0;
   display: flex;
 }
 
-.doclist-icon.ready   { color: #6c63ff; }
-.doclist-icon.error   { color: #c0392b; }
+.doclist-icon.ready   { color: var(--color-accent); }
+.doclist-icon.error   { color: var(--color-danger); }
 
 .doclist-info {
   flex: 1;
@@ -51,7 +52,7 @@
 .doclist-name {
   font-size: 14px;
   font-weight: 500;
-  color: #222;
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -59,7 +60,7 @@
 
 .doclist-meta {
   font-size: 12px;
-  color: #aaa;
+  color: var(--color-text-secondary);
 }
 
 .doclist-status {
@@ -74,18 +75,18 @@
 }
 
 .doclist-badge.processing {
-  background: #fff8e6;
-  color: #b07800;
+  background: var(--color-warning-subtle);
+  color: var(--color-warning);
 }
 
 .doclist-badge.ready {
-  background: #f0eeff;
-  color: #5a52c8;
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
 }
 
 .doclist-badge.error {
-  background: #fdf0f0;
-  color: #c0392b;
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
   cursor: help;
 }
 
@@ -104,19 +105,19 @@
   border-radius: 6px;
   border: none;
   background: none;
-  color: #aaa;
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: background 0.12s, color 0.12s;
 }
 
 .doclist-action-btn:hover:not(:disabled) {
-  background: #f0eeff;
-  color: #6c63ff;
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
 }
 
 .doclist-action-btn.delete:hover:not(:disabled) {
-  background: #fdf0f0;
-  color: #c0392b;
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
 }
 
 .doclist-action-btn:disabled {
@@ -126,8 +127,9 @@
 
 /* Empty state */
 .doclist-empty {
-  background: #fff;
-  border-radius: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
   padding: 64px 24px;
   text-align: center;
   display: flex;
@@ -144,11 +146,11 @@
 .doclist-empty-title {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text);
 }
 
 .doclist-empty-hint {
   font-size: 14px;
-  color: #aaa;
+  color: var(--color-text-secondary);
   max-width: 300px;
 }
