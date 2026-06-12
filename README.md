@@ -52,24 +52,27 @@ PORT=3001
 Install dependencies:
 
 ```bash
-cd server
-npm install
-
-cd ../client
-npm install
-```
-
-Prepare the database:
-
-```bash
-cd server
-npx prisma migrate dev
+npm run install:all
 ```
 
 Run the app:
 
 ```bash
+npm run dev
+```
+
+This starts PostgreSQL with Docker Compose, applies Prisma migrations, and runs
+the Express API and Vite client together.
+
+Open the Vite URL, usually `http://localhost:5173`.
+
+You can also run each part manually:
+
+```bash
+docker compose up -d
+
 cd server
+npm run db:migrate
 npm run dev
 ```
 
@@ -80,22 +83,18 @@ cd client
 npm run dev
 ```
 
-Open the Vite URL, usually `http://localhost:5173`.
-
 ## Validation
 
 Frontend build:
 
 ```bash
-cd client
 npm run build
 ```
 
 Backend type check:
 
 ```bash
-cd server
-npx tsc --noEmit
+npm run typecheck
 ```
 
 ## API Overview
@@ -107,3 +106,4 @@ npx tsc --noEmit
 - `POST /api/chat` streams a per-document AI response
 - `POST /api/chat/general` streams an all-documents AI response
 - `POST /api/sessions` creates or returns a chat session
+- `DELETE /api/sessions/:id` clears one chat session

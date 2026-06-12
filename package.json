@@ -1,0 +1,10 @@
+{
+  "name": "ai-pulse-onboarder-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "docker compose up -d && npm --prefix server run db:migrate && sh -c 'npm --prefix server run dev & npm --prefix client run dev; wait'",
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "build": "npm --prefix client run build",
+    "typecheck": "npm --prefix server run typecheck"
+  }
+}

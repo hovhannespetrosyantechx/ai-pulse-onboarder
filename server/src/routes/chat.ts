@@ -10,6 +10,8 @@ const MODEL = "openai/gpt-oss-120b";
 // ~4 chars per token; reserve 4k tokens for conversation + response
 const MAX_CONTEXT_CHARS = 16_000;
 const MAX_CONTEXT_CHUNKS = 12;
+const SUMMARY_CHARS_PER_DOC = 700;
+const MAX_HEADERS_PER_DOC = 8;
 
 const SYSTEM_BASE = `You are an AI Onboarding Assistant. \
 Use the provided context below to answer questions. \
@@ -114,10 +116,65 @@ function buildDocContext(name: string, chunks: string[], question: string): stri
   return `Document: "${name}"\n\n${ctx}`;
 }
 
+function normalizeWhitespace(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
+}
+
+function summarizeDocument(chunks: string[]): string {
+  const firstText = normalizeWhitespace(chunks.join("\n").slice(0, SUMMARY_CHARS_PER_DOC));
+  if (firstText.length <= SUMMARY_CHARS_PER_DOC) return firstText;
+  return `${firstText.slice(0, SUMMARY_CHARS_PER_DOC).trim()}...`;
+}
+
+function extractHeaders(chunks: string[]): string[] {
+  const seen = new Set<string>();
+  const headers: string[] = [];
+  const lines = chunks.join("\n").split(/\r?\n/);
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line || line.length > 120) continue;
+
+    const markdownHeading = line.match(/^#{1,6}\s+(.+)$/)?.[1];
+    const numberedHeading = line.match(/^\d+(\.\d+)*[.)]?\s+([A-Z][\w\s&/-]{3,})$/)?.[2];
+    const titledLine =
+      /^[A-Z][A-Za-z0-9\s&/-]{3,}:$/.test(line) ||
+      (/^[A-Z][A-Za-z0-9\s&/-]{3,}$/.test(line) && line.split(/\s+/).length <= 10)
+        ? line.replace(/:$/, "")
+        : null;
+
+    const header = normalizeWhitespace(markdownHeading ?? numberedHeading ?? titledLine ?? "");
+    const key = header.toLowerCase();
+    if (!header || seen.has(key)) continue;
+
+    seen.add(key);
+    headers.push(header);
+    if (headers.length >= MAX_HEADERS_PER_DOC) break;
+  }
+
+  return headers;
+}
+
 function buildGeneralContext(
   docs: Array<{ name: string; chunks: string[] }>,
   question: string,
 ): string {
+  let ctx = "Document summaries and headers:\n\n";
+
+  for (const doc of docs) {
+    const headers = extractHeaders(doc.chunks);
+    const summary = summarizeDocument(doc.chunks);
+    const section = [
+      `--- Document: "${doc.name}" ---`,
+      `Summary: ${summary || "No summary available."}`,
+      `Headers: ${headers.length > 0 ? headers.join("; ") : "No clear headers found."}`,
+      "",
+    ].join("\n");
+
+    if (ctx.length + section.length > MAX_CONTEXT_CHARS) break;
+    ctx += section;
+  }
+
   const queryTerms = tokenize(question);
   const rankedChunks = docs
     .flatMap((doc) =>
@@ -136,7 +193,7 @@ function buildGeneralContext(
     )
     .slice(0, MAX_CONTEXT_CHUNKS);
 
-  let ctx = "";
+  ctx += "\nRelevant excerpts:\n\n";
   for (const item of rankedChunks) {
     const section = `--- Document: "${item.docName}", chunk ${item.index + 1} ---\n${item.chunk.trim()}\n\n`;
     if (ctx.length + section.length > MAX_CONTEXT_CHARS) break;
