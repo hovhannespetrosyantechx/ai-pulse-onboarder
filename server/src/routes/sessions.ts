@@ -3,6 +3,17 @@ import { prisma } from "../lib/prisma";
 
 const router = Router();
 
+router.delete("/:id", async (req: Request, res: Response) => {
+  const { id } = req.params as { id: string };
+
+  try {
+    await prisma.chatSession.delete({ where: { id } });
+    res.status(204).send();
+  } catch {
+    res.status(404).json({ error: "Chat session not found." });
+  }
+});
+
 router.post("/", async (req: Request, res: Response) => {
   const { documentId, type } = req.body as {
     documentId?: string;

@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import type { Document, ChatMessage } from "../types";
 import ReactMarkdown from "react-markdown";
-import { FileText, FileJson, File, ArrowLeft, Send, AlertTriangle } from "lucide-react";
+import remarkGfm from "remark-gfm";
+import { FileText, FileJson, File, ArrowLeft, Send, AlertTriangle, Trash2 } from "lucide-react";
 import "./ChatInterface.css";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -47,40 +48,45 @@ export default function ChatInterface({
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isClearing, setIsClearing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  async function loadSession() {
+    const body =
+      mode === "document"
+        ? { documentId: document?.id }
+        : { type: "general" };
+
+    const res = await fetch(`${API_BASE}/api/sessions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) throw new Error(`Session init failed: ${res.status}`);
+
+    const session = await res.json();
+
+    setSessionId(session.id);
+    setMessages(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      session.messages.map((m: any) => ({
+        role: m.role,
+        content: m.content,
+        createdAt: m.createdAt,
+      })),
+    );
+  }
 
   // ── Init session on mount ─────────────────────────────────────────────────
   useEffect(() => {
     async function initSession() {
       setIsLoading(true);
       try {
-        const body =
-          mode === "document"
-            ? { documentId: document?.id }
-            : { type: "general" };
-
-        const res = await fetch(`${API_BASE}/api/sessions`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-
-        if (!res.ok) throw new Error(`Session init failed: ${res.status}`);
-
-        const session = await res.json();
-
-        setSessionId(session.id);
-        setMessages(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          session.messages.map((m: any) => ({
-            role: m.role,
-            content: m.content,
-            createdAt: m.createdAt,
-          })),
-        );
+        await loadSession();
       } catch (err) {
         console.error("Failed to initialise session:", err);
         // Non-fatal — chat still works, messages just won't persist
@@ -180,6 +186,37 @@ export default function ChatInterface({
     }
   }
 
+  async function clearCurrentChat() {
+    if (!sessionId || isStreaming || isClearing) return;
+
+    const confirmed = window.confirm("Clear this chat session?");
+    if (!confirmed) return;
+
+    setError(null);
+    setIsClearing(true);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/sessions/${sessionId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error ?? "Failed to clear chat session");
+      }
+
+      setSessionId(null);
+      setMessages([]);
+      await loadSession();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to clear chat session";
+      setError(msg);
+    } finally {
+      setIsClearing(false);
+      textareaRef.current?.focus();
+    }
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -224,7 +261,15 @@ export default function ChatInterface({
             <span className="ci-doc-name">All Documents</span>
           )}
         </div>
-        <div className="ci-header-spacer" aria-hidden />
+        <button
+          className="ci-clear-btn"
+          onClick={clearCurrentChat}
+          disabled={!sessionId || isLoading || isStreaming || isClearing || messages.length === 0}
+          title="Clear this chat"
+          aria-label="Clear this chat"
+        >
+          <Trash2 size={15} />
+        </button>
       </header>
 
       <main className="ci-messages">
@@ -266,7 +311,7 @@ export default function ChatInterface({
           <div key={i} className={`ci-msg ci-msg--${msg.role}`}>
             <div className="ci-bubble">
               {msg.role === "assistant" ? (
-                <ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {msg.content === "" && isStreaming ? "▋" : msg.content}
                 </ReactMarkdown>
               ) : (

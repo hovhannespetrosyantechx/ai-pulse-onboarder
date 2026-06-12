@@ -40,6 +40,32 @@
   color: var(--color-text);
 }
 
+.ci-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+}
+
+.ci-clear-btn:hover:not(:disabled) {
+  background: var(--color-danger-subtle);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.ci-clear-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .ci-header-title {
   display: flex;
   align-items: center;
@@ -74,12 +100,6 @@
   background: var(--color-accent-subtle);
   color: var(--color-accent);
   white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* Mirror the back-btn width so the title stays centred */
-.ci-header-spacer {
-  width: 72px;
   flex-shrink: 0;
 }
 
