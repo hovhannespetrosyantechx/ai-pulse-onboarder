@@ -11,10 +11,17 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") })
 const app = express()
 const PORT = process.env.PORT || 3001
 
+// Dynamic CORS – allow localhost and the frontend URL provided by Render
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.FRONTEND_URL
+].filter(Boolean) as string[];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     methods: ["GET", "POST", "DELETE"],
+    credentials: true,
   })
 )
 
