@@ -22,7 +22,7 @@ const SUGGESTED_PROMPTS = [
   "Is there any conflicting information between documents?",
 ];
 
-const API_BASE = "http://localhost:3001";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

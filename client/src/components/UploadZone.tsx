@@ -6,6 +6,8 @@ interface UploadZoneProps {
   onUploadComplete: () => void
 }
 
+export const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 const ACCEPTED_TYPES = ["application/pdf", "text/plain", "text/markdown"]
 const MAX_SIZE_MB = 10
 
@@ -41,7 +43,7 @@ export default function UploadZone({ onUploadComplete }: UploadZoneProps) {
       const formData = new FormData()
       formData.append("file", file)
 
-      const res = await fetch("http://localhost:3001/api/documents", {
+      const res = await fetch(`${API_BASE}/api/documents`, {
         method: "POST",
         body: formData,
       })

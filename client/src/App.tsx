@@ -7,17 +7,18 @@ import ChatInterface from "./components/ChatInterface";
 import type { Document, View } from "./types";
 import "./App.css";
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 const fetcher = (url: string) =>
   fetch(url).then((res) => {
     if (!res.ok) throw new Error(`Server error: ${res.status}`);
     return res.json();
   });
-
 export default function App() {
   const [view, setView] = useState<View>({ type: "dashboard" });
 
   const { data: documents = [], mutate } = useSWR<Document[]>(
-    "http://localhost:3001/api/documents",
+    `${API_BASE}/api/documents`,
     fetcher,
     {
       // function form: SWR passes the latest data in so we can decide the interval
@@ -27,7 +28,7 @@ export default function App() {
   );
 
   const handleDelete = async (id: string) => {
-    await fetch(`http://localhost:3001/api/documents/${id}`, {
+    await fetch(`${API_BASE}/api/documents/${id}`, {
       method: "DELETE",
     });
     mutate(); // refetch after delete
