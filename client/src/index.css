@@ -1,0 +1,52 @@
+:root {
+  --color-bg: #0b1120;
+  --color-sidebar: #08111f;
+  --color-surface: #111827;
+  --color-surface-raised: #172033;
+  --color-text: #e5edf8;
+  --color-text-secondary: #94a3b8;
+  --color-border: #253149;
+  --color-accent: #38bdf8;
+  --color-accent-strong: #0ea5e9;
+  --color-accent-subtle: rgba(56, 189, 248, 0.14);
+  --color-on-accent: #ffffff;
+  --color-danger: #fb7185;
+  --color-danger-subtle: rgba(251, 113, 133, 0.14);
+  --color-warning: #fbbf24;
+  --color-warning-subtle: rgba(251, 191, 36, 0.14);
+  --color-code-bg: rgba(148, 163, 184, 0.14);
+
+  --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, Consolas, monospace;
+
+  color-scheme: dark;
+  font: 16px/145% var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+button,
+textarea,
+input {
+  font: inherit;
+}
+
+code {
+  font-family: var(--font-mono);
+}

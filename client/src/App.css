@@ -1,0 +1,46 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-bg);
+  font-family: var(--font-sans);
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0; /* prevents flex blowout */
+}
+
+/* Responsive tweaks */
+@media (max-width: 900px) {
+  .app-layout {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .main-content {
+    padding: 12px;
+    gap: 12px;
+  }
+}
