@@ -56,6 +56,16 @@
   color: var(--color-text-secondary);
 }
 
+@media (max-width: 900px) {
+  .upload-zone { padding: 28px 18px; }
+}
+
+@media (max-width: 520px) {
+  .upload-zone { padding: 18px 12px; }
+  .upload-label { font-size: 14px; }
+  .upload-hint { font-size: 12px; }
+}
+
 .upload-error {
   margin-top: 12px;
   font-size: 13px;

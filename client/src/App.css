@@ -25,3 +25,22 @@ html, body, #root {
   gap: 24px;
   min-width: 0; /* prevents flex blowout */
 }
+
+/* Responsive tweaks */
+@media (max-width: 900px) {
+  .app-layout {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .main-content {
+    padding: 12px;
+    gap: 12px;
+  }
+}

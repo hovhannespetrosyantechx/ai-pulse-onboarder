@@ -76,6 +76,48 @@
   padding: 0 12px;
 }
 
+/* Responsive: convert sidebar to a top nav on small screens */
+@media (max-width: 900px) {
+  .sidebar {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .sidebar-logo {
+    padding: 8px 12px;
+    margin-bottom: 0;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    gap: 6px;
+    padding: 0;
+    margin-left: 8px;
+  }
+
+  .sidebar-docs {
+    display: none; /* hide the long doc list in top nav */
+  }
+
+  .sidebar-nav-item {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 520px) {
+  .sidebar-logo span { display: none; }
+  .sidebar-nav-item { font-size: 12px; padding: 6px 8px; }
+}
+
 .sidebar-doc-item {
   display: flex;
   align-items: center;

@@ -28,6 +28,20 @@
   transition: background 0.12s;
 }
 
+@media (max-width: 900px) {
+  .doclist { padding: 16px; }
+  .doclist-item { padding: 10px; gap: 10px; }
+  .doclist-name { font-size: 13px; }
+  .doclist-meta { font-size: 12px; }
+}
+
+@media (max-width: 520px) {
+  .doclist { padding: 12px; }
+  .doclist-item { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .doclist-actions { align-self: stretch; display: flex; gap: 8px; }
+  .doclist-meta { color: var(--color-text-secondary); }
+}
+
 .doclist-item:hover {
   background: var(--color-bg);
 }

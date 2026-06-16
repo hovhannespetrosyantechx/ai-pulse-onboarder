@@ -213,6 +213,25 @@
   line-height: 1.6;
 }
 
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .ci-header-title { justify-content: flex-start; }
+  .ci-doc-name { max-width: 180px; }
+  .ci-messages { padding: 18px 12px 12px; }
+  .ci-msg { max-width: 88%; }
+  .ci-bubble { font-size: 13px; }
+}
+
+@media (max-width: 520px) {
+  .ci-msg { max-width: 100%; }
+  .ci-bubble { padding: 8px 10px; font-size: 13px; }
+  .ci-header { padding: 10px 12px; }
+  .ci-footer { padding: 10px 12px 12px; }
+  .ci-textarea { min-height: 36px; }
+  .ci-send-btn { width: 36px; height: 36px; }
+  .ci-header-title { justify-content: center; }
+}
+
 /* User bubble */
 .ci-msg--user .ci-bubble {
   background: var(--color-accent-strong);
